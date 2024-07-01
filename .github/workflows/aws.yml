@@ -35,44 +35,15 @@ jobs:
         run: |
           echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
 
-  deploy-to-ecr:
-    name: 📦 Deploy to ECR
+      - name: Debug Outputs
+        run: |
+          echo "Available Outputs:"
+          echo "${{ toJson(steps.login-ecr.outputs) }}"
+
+  job2:
+    name: Another Job
+    runs-on: ubuntu-latest
     needs: login
-    runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.build-image.outputs.image }}
     steps:
-      - name: 🏗️ Build, Tag, and Push Image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ needs.login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          echo "ECR Registry: ${{ needs.login.outputs.registry }}"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "📦 Image built and pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
-  deploy-to-lambda:
-    name: 🚀 Deploy to Lambda
-    needs: [login, deploy-to-ecr]
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🔑 Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: 🚀 Update Lambda Function
-        run: |
-          aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --image-uri ${{ needs.deploy-to-ecr.outputs.image }} \
-            --region ${{ env.AWS_REGION }}
-
-      - name: 🎉 Deployment Complete
-        run: |
-          echo "🎉 Lambda function updated with image: ${{ needs.deploy-to-ecr.outputs.image }}"
+      - name: Use ECR Registry in Job2
+        run: echo "The ECR registry URL is ${{ needs.login.outputs.registry }}"
