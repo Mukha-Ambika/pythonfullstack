@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./* ./sharbo-app/
 
-CMD ["app.my_lambda_function.lambda_handler"]
+CMD [ "app.lambda_handler" ]
