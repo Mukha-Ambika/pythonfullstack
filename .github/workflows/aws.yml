@@ -1,71 +1,83 @@
-name: Deploy to ECR and Host on Lambda
+name: 🚀 Deploy to ECR and Host on Lambda
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1                     # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: sharbo-app                # set this to your Amazon ECR repository name
-  LAMBDA_FUNCTION_NAME: sharbo-stage        # set this to your AWS Lambda function name
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: sharbo-app
+  LAMBDA_FUNCTION_NAME: sharbo-stage
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
-    name: Deploy
+  login:
+    name: 🔐 AWS Login
     runs-on: ubuntu-latest
-    environment: development
-
+    outputs:
+      registry: ${{ steps.login-ecr.outputs.registry }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: 🔑 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: 🔓 Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+  deploy-to-ecr:
+    name: 📦 Deploy to ECR
+    needs: login
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and
-        # push it to ECR
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-        echo "ECR Registry: $ECR_REGISTRY"
-        echo "ECR Repository: $ECR_REPOSITORY"
-        echo "Image URI: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      - name: 🔑 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    # - name: Log out of Docker Hub
-    #   run: docker logout
+      - name: 🏗️ Build, Tag, and Push Image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ needs.login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "📦 Image built and pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-    # - name: Get latest image URI
-    #   id: get-image-uri
-    #   run: |
-    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
-    #     echo "ECR Registry: $ECR_REGISTRY"
-    #     echo "ECR Repository: $ECR_REPOSITORY"
-    #     echo "Image URI from ECR: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
+  deploy-to-lambda:
+    name: 🚀 Deploy to Lambda
+    needs: [login, deploy-to-ecr]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔑 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Deploy to AWS Lambda
-      run: |
-        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri ${{ steps.build-image.outputs.image }} --region $AWS_REGION
+      - name: 🚀 Update Lambda Function
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --image-uri ${{ needs.deploy-to-ecr.outputs.image }} \
+            --region ${{ env.AWS_REGION }}
 
-    - name: Clean up
-      run: |
-        rm $GITHUB_OUTPUT
-        echo "Lambda function updated with image URI ${{ steps.build-image.outputs.image }}" 
+      - name: 🎉 Deployment Complete
+        run: |
+          echo "🎉 Lambda function updated with image: ${{ needs.deploy-to-ecr.outputs.image }}"
