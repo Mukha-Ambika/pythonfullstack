@@ -3,8 +3,7 @@ name: 🧪 Development Workflow
 on:
   push:
     branches: [development]
-  pull_request:
-    branches: [development]
+  workflow_dispatch:
 
 jobs:
   test:

@@ -1,4 +1,4 @@
-name: 🚀 Sharbo ECR-Lambda CI/CD Pipeline
+name: 🚀 Sharbo ECR-Lambda CI/CD Pipeline (Production)
 
 on:
   push:
