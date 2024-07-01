@@ -20,6 +20,6 @@ async def read_root2():
 
 
 # This allows the handler to work as expected when run locally
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=80)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=80)

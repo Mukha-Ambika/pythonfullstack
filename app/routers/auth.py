@@ -9,6 +9,7 @@ router = APIRouter()
 @router.post("/login/")
 def login_route(user: Login):
     clerk_login_url = f"{CLERK_API_FRONTEND_URL }/v1/client/sign_ins"
+    print(clerk_login_url)
     payload = {
         "strategy": "password",
         "identifier": user.email_address,
