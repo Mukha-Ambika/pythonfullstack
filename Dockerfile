@@ -1,11 +1,11 @@
 FROM public.ecr.aws/lambda/python:3.9 as lambda
 
-WORKDIR /sharbo-app
-
-COPY . .
+COPY requirements.txt .
 
 RUN pip install requests pandas beautifulsoup4 lxml
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./* ./sharbo-app/
 
 COPY my_lambda_function.py ./
 
