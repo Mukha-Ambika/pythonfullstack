@@ -1,4 +1,4 @@
-name: 🚀 Deploy to ECR and Host on Lambda
+name: 🚀 Sharbo-API ECR-Lambda CI/CD Pipeline
 
 on:
   push:
@@ -31,6 +31,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Display ECR Registry
+        run: |
+          echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
+
   deploy-to-ecr:
     name: 📦 Deploy to ECR
     needs: login
@@ -44,7 +48,7 @@ jobs:
           ECR_REGISTRY: ${{ needs.login.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "ECR Registry: $ECR_REGISTRY"
+          echo "ECR Registry: ${{ needs.login.outputs.registry }}"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
