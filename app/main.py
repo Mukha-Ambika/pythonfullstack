@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from app.routers import auth
-from mangum import Mangum
 
 app = FastAPI()
 
-# Lambda handler
-handler = Mangum(app)
+# Lambda handler function
+def handler(event, context):
+    # Your handler code here
+    return app(event, context)  # Assuming FastAPI app can handle event and context
+
 
 # app.include_router(auth.router)
 
