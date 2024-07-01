@@ -1,20 +1,17 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use the official AWS Lambda Python base image
+FROM public.ecr.aws/lambda/python:3.9
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /var/task
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy the requirements file first for better caching
+COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+# Copy the rest of the application code into the container at /var/task
+COPY . .
 
-# Define environment variable
-ENV NAME sharboenv
-
-# Run app.py when the container launches
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Command to run the Lambda function handler
+CMD ["app.main.handler"]
