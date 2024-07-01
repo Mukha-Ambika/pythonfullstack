@@ -1,0 +1,35 @@
+name: 🔍 Feature/Fix Branch Checks
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'fix/**'
+  pull_request:
+    branches:
+      - development
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: 🧪 Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧹 Run linter
+        run: pylint **/*.py
+
+      - name: 🏗️ Verify build
+        run: docker build -t sharbo-app:test .

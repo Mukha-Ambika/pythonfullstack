@@ -1,3 +1,7 @@
+"""
+Routes for handling authentication.
+"""
+
 from fastapi import APIRouter
 from app.utils.security import *
 from app.schemas.auth import *
@@ -8,13 +12,21 @@ router = APIRouter()
 
 @router.post("/login/")
 def login_route(user: Login):
-    clerk_login_url = f"{CLERK_API_FRONTEND_URL }/v1/client/sign_ins"
+    """
+    Handle the login route.
+
+    Args:
+        user (Login): The user object containing email address and password.
+
+    Returns:
+        Response: The response from the login request.
+    """
+    clerk_login_url = f"{CLERK_API_FRONTEND_URL}/v1/client/sign_ins"
     print(clerk_login_url)
     payload = {
         "strategy": "password",
         "identifier": user.email_address,
         "password": user.password
-
     }
     headers = BASE_HEADERS.copy()
     headers["Content-Type"] = "application/x-www-form-urlencoded"
@@ -23,6 +35,19 @@ def login_route(user: Login):
 
 @router.post("/register/")
 def register_route(user: Register):
+    """
+    Register a user using the provided user information.
+
+    Args:
+        user (Register): The user information for registration.
+
+    Returns:
+        dict: The response from the registration API.
+
+    Raises:
+        Exception: If there is an error during the registration process.
+    """
+    
     clerk_register_url = f"{CLERK_API_FRONTEND_URL }/v1/client/sign_ups"
     payload = {
         "strategy": "email_code",

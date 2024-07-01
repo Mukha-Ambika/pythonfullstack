@@ -1,3 +1,7 @@
+"""
+    Helper Functions for Authentication
+"""
+
 import requests
 from app.utils.get_env import *
 
@@ -7,6 +11,23 @@ BASE_HEADERS = {
 
 
 def make_request(url, headers, requests_form="get", params=None, files=None, data=None):    
+    """
+    Makes a request to the specified URL using the specified HTTP method.
+
+    Args:
+        url (str): The URL to make the request to.
+        headers (dict): The headers to include in the request.
+        requests_form (str, optional): The HTTP method to use for the request. Defaults to "get".
+        params (dict, optional): The query parameters to include in the request. Defaults to None.
+        files (dict, optional): The files to include in the request. Defaults to None.
+        data (dict, optional): The data to include in the request. Defaults to None.
+
+    Returns:
+        dict: The JSON response from the request.
+
+    Raises:
+        Exception: If an error occurs while making the request.
+    """
     print("Making request to ", url)
     try:
         if requests_form == "get":
