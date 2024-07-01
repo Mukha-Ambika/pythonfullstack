@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from mangum import Mangum
 
-from app.utils.get_env import *
+from sharbo_app.app.utils.get_env import *
 
 app = FastAPI()
 # Lambda handler
