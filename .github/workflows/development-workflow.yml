@@ -25,10 +25,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: 🧪 Run unit tests
-        run: python -m pytest tests/unit
+        run: python -m pytest tests/unit.py
 
       - name: 🧪 Run integration tests
-        run: python -m pytest tests/integration
+        run: python -m pytest tests/integration.py
 
   build:
     name: 🏗️ Build Docker Image
