@@ -1,18 +1,15 @@
 from fastapi import FastAPI
 from app.routers import auth
+from mangum import Mangum
 
 app = FastAPI()
-
-# Lambda handler function
-def handler(event, context):
-    # Your handler code here
-    return app(event, context)  # Assuming FastAPI app can handle event and context
-
+# Lambda handler
+handler = Mangum(app)
 
 # app.include_router(auth.router)
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"message": "Welcome to Sharbo!"}
 
 
