@@ -54,6 +54,8 @@ jobs:
       id: get-image-uri
       run: |
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
+        echo "ECR Registry: $ECR_REGISTRY"
+        echo "ECR Repository: $ECR_REPOSITORY"
         echo "Image URI from ECR: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
 
     - name: Deploy to AWS Lambda
