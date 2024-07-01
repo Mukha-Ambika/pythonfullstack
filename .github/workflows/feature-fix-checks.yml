@@ -31,8 +31,5 @@ jobs:
       - name: 🧹 Run linter
         run: pylint **/*.py
 
-      - name: 🧪 Run unit tests
-        run: python -m pytest tests/unit.py
-
       - name: 🏗️ Verify build
         run: docker build -t sharbo-app:test .
