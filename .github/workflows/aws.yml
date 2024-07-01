@@ -27,6 +27,9 @@
 name: Deploy to Amazon ECR
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
