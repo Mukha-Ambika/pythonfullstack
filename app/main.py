@@ -6,11 +6,16 @@ app = FastAPI()
 # Lambda handler
 handler = Mangum(app)
 
-# app.include_router(auth.router)
+app.include_router(auth.router)
 
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to Sharbo!"}
+
+
+@app.get("/scrape")
+async def read_root2():
+    return {"message": "Welcome to Sharbo!2"}
 
 
 
