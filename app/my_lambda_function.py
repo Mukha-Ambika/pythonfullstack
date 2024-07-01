@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 import requests
 from mangum import Mangum
 
-# from app.utils.get_env import *
+from app.utils.get_env import *
 
 app = FastAPI()
 # Lambda handler
@@ -13,7 +13,7 @@ def scrape_wikipedia():
     try:
         return {
             'statusCode': 200,
-            'body': 'CLERK_API_BASE_URL'
+            'body': CLERK_API_BASE_URL
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
