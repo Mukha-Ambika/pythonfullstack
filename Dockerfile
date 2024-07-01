@@ -9,4 +9,4 @@ COPY ./* ./sharbo-app/
 
 COPY my_lambda_function.py ./
 
-CMD [ "my_lambda_function.lambda_handler" ]
+CMD [ "my_lambda_function.handler" ]
