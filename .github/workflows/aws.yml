@@ -50,22 +50,22 @@ jobs:
         echo "ECR Repository: $ECR_REPOSITORY"
         echo "Image URI: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-    - name: Log out of Docker Hub
-      run: docker logout
+    # - name: Log out of Docker Hub
+    #   run: docker logout
 
-    - name: Get latest image URI
-      id: get-image-uri
-      run: |
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
-        echo "ECR Registry: $ECR_REGISTRY"
-        echo "ECR Repository: $ECR_REPOSITORY"
-        echo "Image URI from ECR: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
+    # - name: Get latest image URI
+    #   id: get-image-uri
+    #   run: |
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
+    #     echo "ECR Registry: $ECR_REGISTRY"
+    #     echo "ECR Repository: $ECR_REPOSITORY"
+    #     echo "Image URI from ECR: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
 
     - name: Deploy to AWS Lambda
       run: |
-        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri ${{ steps.get-image-uri.outputs.image }} --region ${{ env.AWS_REGION }}
+        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri ${{ steps.build-image.outputs.image }} --region $AWS_REGION
 
     - name: Clean up
       run: |
         rm $GITHUB_OUTPUT
-        echo "Lambda function updated with image URI ${{ steps.get-image-uri.outputs.image }}"
+        echo "Lambda function updated with image URI ${{ steps.build-image.outputs.image }}" 
